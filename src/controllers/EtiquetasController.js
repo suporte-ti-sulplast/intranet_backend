@@ -783,6 +783,9 @@ exports.coqLabelsPrintRoto = async (req, res) => {
     const { printerName, qtdade, codigo, material } = req.body;
     let printer;
 
+    let palavras = material.split(" ");
+    let materialComHifen = palavras.join("-");
+
     try {
         printer = await PrintersModel.findOne({
             attributes: ['printerName', 'model','ip','netUsb'],
@@ -811,10 +814,8 @@ exports.coqLabelsPrintRoto = async (req, res) => {
 
     '^LL' + altura + '\n' + // Define o comprimento
     '^PW' + comprimento + '\n' + // Define a altura
-    '^CF0,60\n' +
-    '^FO290,15^FD' + codigo + '^FS \n' +
-    '^CF0,60\n' +
-    '^FO270,90^FD' + material + '^FS \n' +
+    '^CF0,64\n' +
+    '^FO110,75^FD' + codigo + ' ' + materialComHifen +  '^FS \n' +
 
     '^XZ'; // Fecha o arquivo
 

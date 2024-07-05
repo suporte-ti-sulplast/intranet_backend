@@ -169,7 +169,7 @@ auth.post('/', async (req, res) => {
     const userAgent = req.headers['user-agent']; // captura o navegador
 
     const lastAccessLog = await LogsAcessos.findOne({
-    attributes: ['idLog', 'userLogin','failedAttempts'],
+    attributes: ['idLog', 'userLogin','failedAttempts','status'],
     where: {
         userLogin: login,
     },
@@ -202,7 +202,7 @@ auth.post('/', async (req, res) => {
         if(lastAccessLog)
         {
             //se tem pega o número de tentativas erradas e soma + 1
-            fail = lastAccessLog.failedAttempts + 1;
+            fail = lastAccessLog.failedAttempts === 5 || lastAccessLog.status === 'Bloqueado' ? 0 : lastAccessLog.failedAttempts + 1;
             if(fail === errorAttempts)
             {  
                 try 
@@ -224,7 +224,7 @@ auth.post('/', async (req, res) => {
                     console.error('Erro ao atualizar o status do usuário:', error);
                     throw error;
                 }       
-                fail = 0;
+              /*   fail = 0; */
                 userOK = 4;
             }
         }
@@ -244,7 +244,7 @@ auth.post('/', async (req, res) => {
 
     const novoAcesso  = {
         userLogin: req.body.login,
-        status: userStatus,
+        status: fail === errorAttempts ? 'Bloqueado' : userStatus,
         action: ( userOK === 5 ? "permitido" : "negado" ),
         description: logDescription,
         failedAttempts: fail,
