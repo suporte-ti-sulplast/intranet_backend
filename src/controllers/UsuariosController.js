@@ -6,6 +6,9 @@ const SettingsModel = require('../../models/Configuracoes');
 const EmailsGruposModel = require('../../models/EmailsGrupos');
 const EmailsGruposUsuariosModel = require('../../models/EmailsGruposUsuarios');
 const TelasPermissoesUsuariosModel = require('../../models/TelasPermissoesUsuarios');
+const SistemasModel = require('../../models/Sistemas');
+const SistemasUsuariosModel = require('../../models/SistemasUsuarios');
+const SistemasDepartamentosModel = require('../../models/SistemasDepartamentos');
 const calcularDiferencaEmDias = require('../functions/paswordAge');
 const { sendEmailPassword } = require('../functions/sendEmail');
 const Sequelize = require('sequelize');
@@ -302,6 +305,10 @@ exports.userAddBD = async (req, res) => {
   var crachaCrypto = (idBadge !== null && idBadge !== undefined && idBadge !== '') ? encryptData(idBadge) : '';
   var msg, msg_type;
 
+  const sistemasMarcados = req.body.sistemasMarcados
+
+  console.log(sistemasMarcados)
+
   //COLOCA O NOVO VALOR NUMA VARIAVEL
   const novoUsuario  = {
       login: req.body.login,
@@ -319,7 +326,6 @@ exports.userAddBD = async (req, res) => {
       birthdate: req.body.birthdate
   };
 
-  console.log(novoUsuario)
 
   //ATUALIZA A TABELA COM O NOVO VALOR
   await UsersModel.create(novoUsuario).then(() => {
@@ -350,6 +356,27 @@ exports.userAddBD = async (req, res) => {
     nest : true
   });
 
+  if(sistemasMarcados.length > 0) {
+    sistemasMarcados.forEach(item => {
+      inserirRegistroNaTabela(item); // 
+    });
+  } else {
+    msg = "Não houve acesso para criar"
+  }
+
+  //SALVA SISTEMAS NA TABELA SISTEMASUSUÁRIOS
+  function inserirRegistroNaTabela(item) {
+    const idUser = createdUser.idUser
+    SistemasUsuariosModel.create({
+      idSys: item,
+      idUser: idUser,
+    }).then(() => {
+        console.log(`Registro adicionado`, item, idUser);
+    }).catch(err => {
+        console.error(`Erro ao adicionar registro: ${err}`);
+    });
+  }
+
   //busca os dados do ip e navegador
   const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     // Remove o prefixo ::ffff: se estiver presente
@@ -377,9 +404,12 @@ exports.userAddBD = async (req, res) => {
 exports.userUpdateBD = async (req, res) => {
 
   var msg, msg_type;
-  const userId = parseInt(req.body.userId);
+  const sistemasMarcados = req.body.sistemasMarcados;
+  const sistemasMarcadosChange = req.body.sistemasMarcadosChange
 
   console.log(req.body)
+  console.log(sistemasMarcados)
+  console.log(sistemasMarcadosChange)
 
   const idBadge = req.body.cracha && req.body.cracha.trim() !== '' ? req.body.cracha : null;
   var crachaCrypto = (idBadge !== null && idBadge !== undefined && idBadge !== '') ? encryptData(idBadge) : '';
@@ -411,6 +441,42 @@ exports.userUpdateBD = async (req, res) => {
     msg = "Houve um erro interno.";
     msg_type = "error";
   });
+
+    //verifica se houve alteração no sistemas
+    if(sistemasMarcadosChange) {
+      //se houve alteração no sistemas
+      SistemasUsuariosModel.destroy({
+        where: {
+          idUser: userId
+        }
+      }).then(() => {
+        console.log("registros de sistemas excluido com sucesso");
+      }).catch((err) => {
+          console.log("erro", err);
+      });
+  
+      if(sistemasMarcados.length > 0) {
+        sistemasMarcados.forEach(item => {
+          inserirRegistroNaTabela(item); // 
+        });
+      } else {
+        msg = "Não houve acesso para criar"
+      }
+    
+      //ATUALIZA SISTEMAS NA TABELA SISTEMASUSUÁRIOS
+      function inserirRegistroNaTabela(item) {
+        SistemasUsuariosModel.create({
+          idSys: item,
+          idUser: userId,
+        }).then(() => {
+            console.log(`Registro adicionado`, item, userId);
+        }).catch(err => {
+            console.error(`Erro ao adicionar registro: ${err}`);
+        })
+      }
+    } else {
+      console.log(`RegisNçao houve alteração de sistemas`);
+    }
 
   return res.json({ msg, msg_type });
 };
@@ -512,19 +578,28 @@ exports.userDelete = async (req, res) => {
       idUser: id
     }
   });
-  
 
+  // Exclui as linhas correspondentes na tabela SistemasUsuariosModel
+  await SistemasUsuariosModel.destroy({
+    where: {
+      idUser: id
+    }
+  });
+  
   // Exclui o usuário da tabela USERS
   await UsersModel.destroy({
     where: {
       idUser: id
     }
-  }).then(() => {
+  }).then(async () => {
+
+   
+    
     msg = "Usuário excluído com sucesso";
     msg_type = "success";
   }).catch((err) => {
     console.log("erro", err);
-    msg = "Houve um erro interno.";
+    msg = "Usuário relacionado com outras tabelas. Impossível deletar.";
     msg_type = "error";
   });
 
@@ -602,7 +677,6 @@ exports.deppto = async (req, res) => {
 
 };
 
-
 //LISTAGEM DOS USUÁRIOS *********************************************************************************************************************************
 exports.userActivyDirectory = async (req, res) => {
 
@@ -646,8 +720,6 @@ exports.userActivyDirectory = async (req, res) => {
   }
 };
 
-
-
 //CRIA GRUPOS EMAILS
 exports.emailsGroupCreate = async (req, res) => {
 
@@ -677,7 +749,6 @@ exports.emailsGroupCreate = async (req, res) => {
   );
 };
 
-
 //CHECA SE EXISTE GRUPOS EMAILS
 exports.grupoEmailFind = async (req, res) => {
 
@@ -699,7 +770,6 @@ exports.grupoEmailFind = async (req, res) => {
       return res.json({ msg, msg_type });
   }
 };
-
 
 //LISTA OS GRUPOS EMAILS
 exports.grupoEmailList = async (req, res) => {
@@ -750,7 +820,6 @@ exports.grupoEmailDelete = async (req, res) => {
   return res.json({ msg, msg_type });
 };
 
-
 //EDITA GRUPOS EMAILS
 exports.emailsGroupEdit = async (req, res) => {
 
@@ -796,7 +865,6 @@ exports.emailsGroupEdit = async (req, res) => {
       }
     );
 };
-
 
 //CRIA GRUPOS EMAILS
 exports.emailsGroupFindUsers = async (req, res) => {
@@ -909,7 +977,6 @@ exports.findSystemsUser = async (req, res) => {
       return res.status(500).json({ error: "Internal server error." });
   }   
 };
-
 
 //BUSCA DOS SISTEMAS do departamento
 exports.findSystemsDepartments = async (req, res) => {
