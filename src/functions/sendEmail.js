@@ -34,7 +34,7 @@ function sendEmailPassword(nameComplete, e_mail, password) {
           <p><strong>${senha}</strong></p>
           <p>Caso você não tenha feito essa alteração, entre em contato com o TI pelo ramal 114.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -48,7 +48,6 @@ function sendEmailPassword(nameComplete, e_mail, password) {
   return ('Email enviado com sucesso!');
 
 }
-
 
 //ENVIO DE EMAIL PARA CRIAÇÃO EDIÇÃO DE IT
 function sendEmailIT(users, it, tipo){
@@ -109,7 +108,7 @@ function sendEmailIT(users, it, tipo){
           <p  style="color: red"><strong>${it}</strong></p>
           <p>Você pode acessar através da INTRANET -> SGIs -> ITs.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
       console.log('Email enviado com sucesso para: ', email);
@@ -149,7 +148,7 @@ function sendEmailVoucher(horas, email) {
           <p>Olá, <strong>Sr. Leandro</strong>.</p>
           <p>Favor gerar novos vouchers de wifi para ${horas} horas.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -163,7 +162,6 @@ function sendEmailVoucher(horas, email) {
   return ('Email enviado com sucesso!');
 
 };
-
 
 //ENVIO DE EMAIL PARA SOLICITAÇÃO ALERTA DE TEMPERATURA
 function sendEmailTempRackSalaTI(equipamento, local, category, direcaoMovimento, estado, temperatura, destinatario) {
@@ -204,7 +202,7 @@ function sendEmailTempRackSalaTI(equipamento, local, category, direcaoMovimento,
             ><strong>${estado}</strong></span>
          </p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-        <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+        <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -218,7 +216,6 @@ function sendEmailTempRackSalaTI(equipamento, local, category, direcaoMovimento,
   return ('Email enviado com sucesso!');
 
 };
-
 
 //ENVIO DE EMAIL PARA ALTERAÇÃO DE SENHA
 function sendSenhasPDF(user, pdfBuffer) {
@@ -254,7 +251,7 @@ function sendSenhasPDF(user, pdfBuffer) {
           <p>Conform solicitado, segue anexo, o PDF com a lista do cofre de senhas.</p>
           <p>Lembre-se de que se for feito o download é importante não deixar salvo na máquina local.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -269,5 +266,72 @@ function sendSenhasPDF(user, pdfBuffer) {
 
 };  
 
+//ENVIO DE EMAIL PARA NOVO ARQUIVO FOLHA PAGAMENTO
+function sendEmailRhFolha(users){
 
-module.exports = {sendEmailPassword, sendEmailIT, sendEmailVoucher, sendEmailTempRackSalaTI, sendSenhasPDF};
+  const sendEmailFolha = async (users) => {
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST || 'smtp.mailgun.org',
+      port: process.env.MAIL_PORT || 587,
+      secure: false, // Para TLS
+      auth: {
+        user: process.env.MAIL_USERNAME,
+        pass: process.env.MAIL_PASSWORD,
+      },
+    });
+  
+    const successfulEmails = [];
+    const failedEmails = [];
+  
+    for (const user of users) {
+      try {
+        await sendEmail(transporter, user);
+        successfulEmails.push(user.nameComplete);
+      } catch (error) {
+        console.error(`Erro ao enviar e-mail para ${user.nameComplete}:`, error);
+        failedEmails.push(user.nameComplete);
+      }
+    }
+  
+    if (successfulEmails.length > 0) {
+      console.log(`E-mails enviados com sucesso para: ${successfulEmails.join(', ')}`);
+    }
+  
+    if (failedEmails.length > 0) {
+      console.error(`Erro ao enviar e-mails para: ${failedEmails.join(', ')}`);
+    }
+  };
+  
+  const sendEmail = async (transporter, user) => {
+    const { nameComplete, email } = user;
+  
+    try {
+      const mailSent = await transporter.sendMail({
+        from: process.env.MAIL_FROM_ADDRESS,
+        to: email,
+        subject: 'Novo arquivo de folha',
+        html: `
+          <br>
+          <h1 style="background-color: green; color: white;"><strong>Novo arquivo de folha</strong>
+          </h1>
+          <br>
+          <p>Olá, <strong>${nameComplete.split(' ')[0].toUpperCase()}</strong>.</p>
+          <p>Novo arquivo de folha de pagamento gerado.</p>
+          <p>Você pode acessar através da INTRANET -> RH -> Aplicações -> Conversor dados folha.</p>
+          <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+        `,
+      });
+      console.log('Email enviado com sucesso para: ', email);
+      return 'Email enviado com sucesso!';
+    } catch (error) {
+      throw new Error('');
+    }
+  };
+
+  sendEmailFolha(users)
+  return 'Email enviados com sucesso!';
+} 
+
+
+module.exports = {sendEmailRhFolha, sendEmailPassword, sendEmailIT, sendEmailVoucher, sendEmailTempRackSalaTI, sendSenhasPDF};

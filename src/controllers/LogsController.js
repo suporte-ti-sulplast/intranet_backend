@@ -11,6 +11,7 @@ exports.alteracaoSenha = async (req, res) => {
       raw: true, // Retorna os resultados como objetos simples, sem instâncias do Sequelize
       nest: true, // Aninhar os resultados para evitar arrays aninhados
       timezone: '-03:00', // Configura o fuso horário para São Paulo (GMT-03:00)
+      order: [['createdAt', 'DESC']], // Ordena os resultados pela coluna 'createdAt' em ordem descendente
     })
 
       return res.json({ logs });

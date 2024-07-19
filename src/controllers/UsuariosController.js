@@ -406,10 +406,12 @@ exports.userUpdateBD = async (req, res) => {
   var msg, msg_type;
   const sistemasMarcados = req.body.sistemasMarcados;
   const sistemasMarcadosChange = req.body.sistemasMarcadosChange
+  const userId = parseInt(req.body.userId);
 
   console.log(req.body)
   console.log(sistemasMarcados)
   console.log(sistemasMarcadosChange)
+
 
   const idBadge = req.body.cracha && req.body.cracha.trim() !== '' ? req.body.cracha : null;
   var crachaCrypto = (idBadge !== null && idBadge !== undefined && idBadge !== '') ? encryptData(idBadge) : '';

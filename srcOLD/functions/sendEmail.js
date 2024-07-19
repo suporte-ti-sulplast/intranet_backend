@@ -34,7 +34,7 @@ function sendEmailPassword(nameComplete, e_mail, password) {
           <p><strong>${senha}</strong></p>
           <p>Caso você não tenha feito essa alteração, entre em contato com o TI pelo ramal 114.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -109,7 +109,7 @@ function sendEmailIT(users, it, tipo){
           <p  style="color: red"><strong>${it}</strong></p>
           <p>Você pode acessar através da INTRANET -> SGIs -> ITs.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
       console.log('Email enviado com sucesso para: ', email);
@@ -149,7 +149,7 @@ function sendEmailVoucher(horas, email) {
           <p>Olá, <strong>Sr. Leandro</strong>.</p>
           <p>Favor gerar novos vouchers de wifi para ${horas} horas.</p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-          <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+          <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
@@ -204,7 +204,7 @@ function sendEmailTempRackSalaTI(equipamento, local, category, direcaoMovimento,
             ><strong>${estado}</strong></span>
          </p>
           <p><strong>Este é um e-mail gerado automaticamente pelo sistema INTRANET SULPLAST, favor não responder.</strong></p>
-        <p  style="background-color: black; color: white;" >Att, TECNOLOGIA DA INFORMAÇÃO</strong></p>
+        <p  style="background-color: black; color: white;" >At.te, TECNOLOGIA DA INFORMAÇÃO</strong></p>
         `,
       });
     } catch (error) {
